@@ -1,15 +1,13 @@
 // lib/screens/main_screen.dart
-
-import 'package:final_project/screens/history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:restart_app/restart_app.dart';
 import '../utils/language_strings.dart';
 import 'home_screen.dart';
 import 'control_screen.dart';
-import 'chat_screen.dart';
-import 'pin_lock_screen.dart';
+import 'history_screen.dart';
 import 'notification_screen.dart';
 import 'change_pin_screen.dart';
+import 'pin_lock_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -31,7 +29,7 @@ class _MainScreenState extends State<MainScreen> {
     _screens = [
       HomeScreen(key: _homeKey),
       ControlScreen(),
-      const ChatScreen(),  // <-- use chat here
+      const HistoryScreen(),  // ✅ Replaced Chat with History
     ];
   }
 
@@ -41,12 +39,15 @@ class _MainScreenState extends State<MainScreen> {
         context,
         MaterialPageRoute(builder: (_) => const PinLockScreen()),
       );
-  void _changePin() => Navigator.push(context,
-        MaterialPageRoute(builder: (_) => const ChangePinScreen()));
+  void _changePin() => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ChangePinScreen()),
+      );
   void _setLang(String code) {
     setState(() => _selectedLanguage = code);
     setLanguage(code);
   }
+
   void _refreshHome() {
     if (_selectedIndex == 0) _homeKey.currentState?.fetchAllData();
   }
@@ -61,17 +62,21 @@ class _MainScreenState extends State<MainScreen> {
             child: Text(tr('settings'),
                 style: const TextStyle(color: Colors.white, fontSize: 24)),
           ),
-           ListTile(
+          ListTile(
             leading: const Icon(Icons.history),
             title: Text(tr('history')),
-            onTap: () =>
-                Navigator.push(context, MaterialPageRoute(builder: (_) => HistoryScreen())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const HistoryScreen()),
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.notifications),
             title: Text(tr('notifications')),
-            onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) =>NotificationScreen())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificationScreen()),
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.lock),
@@ -115,7 +120,7 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
               icon: const Icon(Icons.power), label: tr('controller')),
           BottomNavigationBarItem(
-              icon: const Icon(Icons.chat), label: tr('chat')),  // new icon
+              icon: const Icon(Icons.history), label: tr('history')),  // ✅ Updated icon/label
         ],
       ),
     );

@@ -2,22 +2,71 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../utils/language_strings.dart';
 
-class HistoryScreen extends StatelessWidget {
-  final List<HistoryItem> historyItems;
+class HistoryScreen extends StatefulWidget {
+  final List<HistoryItem> initialHistoryItems;
 
-  const HistoryScreen({super.key, this.historyItems = const []});
+  const HistoryScreen({super.key, this.initialHistoryItems = const []});
+
+  @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  late List<HistoryItem> historyItems;
+
+  @override
+  void initState() {
+    super.initState();
+    historyItems = List.from(widget.initialHistoryItems);
+  }
+
+  void _clearHistory() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(tr('clear_history')),
+        content: Text(tr('confirm_clear_history')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(tr('cancel')),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                historyItems.clear();
+              });
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(tr('history_cleared'))),
+              );
+            },
+            child: Text(tr('confirm')),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('history')), // translated
+        title: Text(tr('history')),
         backgroundColor: Colors.green,
+        actions: [
+          if (historyItems.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.delete),
+              tooltip: tr('clear_history'),
+              onPressed: _clearHistory,
+            ),
+        ],
       ),
       body: historyItems.isEmpty
           ? Center(
               child: Text(
-                tr('no_history'), // translated
+                tr('no_history'),
                 style: const TextStyle(fontSize: 16.0, color: Colors.grey),
               ),
             )
@@ -41,7 +90,7 @@ class HistoryScreen extends StatelessWidget {
                         ),
                         if (item.details != null && item.details!.isNotEmpty) ...[
                           const SizedBox(height: 8.0),
-                          Text('${tr('details')} ${item.details}'), // translated label
+                          Text('${tr('details')} ${item.details}'),
                         ],
                       ],
                     ),

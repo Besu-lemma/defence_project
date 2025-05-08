@@ -16,7 +16,7 @@ const Map<String, Map<String, String>> _localized = {
   'en': {
     // MainScreen & Drawer
     'settings': 'Settings',
-    'title': 'Smart Irrigation',
+    'title': 'Mesno-Tech',
     'home': 'Home',
     'controller': 'Controller',
     'history': 'History',
@@ -33,7 +33,7 @@ const Map<String, Map<String, String>> _localized = {
     'tank_empty_msg': 'The tank is empty so you can\'t turn on the pump',
     'ok': 'OK',
     'confirm_pump_title': 'Confirm Pump Activation',
-    'confirm_pump_msg': 'Are you sure you want to turn on the pump?',
+    'confirm_pump_msg': 'The soil is wet, Are you sure you want to turn on the pump?',
     'cancel': 'Cancel',
     'turn_on': 'Turn On',
     'soil_moisture': 'Soil Moisture',
@@ -74,46 +74,46 @@ const Map<String, Map<String, String>> _localized = {
   'am': {
     // MainScreen & Drawer
     'settings': 'ቅድመ ተከታታይ',
-    'title': 'ስማርት የመረብ ስርዓት',
-    'home': 'አሞሌ',
+    'title': 'መስኖ-ተክ',
+    'home': 'ዋና',
     'controller': 'መቆጣጠሪያ',
     'history': 'ታሪክ',
     'send_feedback': 'አስተያየት ላክ',
     'notifications': 'ማስታወቂያዎች',
-    'change_pin': 'ፒን ቀይር',
+    'change_pin': 'የይለፍ ቁጥር ቀይር',
 
     // Bottom nav labels
-    'pump_control': 'መቆለፊያ መቆጣጠሪያ',
+    'pump_control': 'መቆጣጠሪያ',
 
     // ControlScreen
     'water_tank_status': 'የውሃ ታንክ ሁኔታ',
     'tank_empty_title': 'ታንኩ ባዶ ነው',
-    'tank_empty_msg': 'ታንኩ ባዶ ነው ስለዚህ መቆለፊያ እንዳትከፈት አትችሉ',
+    'tank_empty_msg': 'ታንኩ ባዶ ነው ስለዚህ መቆለፊያ መክፈት አይችሉም',
     'ok': 'እሺ',
-    'confirm_pump_title': 'መቆለፊያ ማብራት ተፈላጊ?',
-    'confirm_pump_msg': 'መቆለፊያን ማብራት ይፈልጋሉ?',
+    'confirm_pump_title': 'መቆለፊያ ማብራት ይፈልጋሉ?',
+    'confirm_pump_msg': 'አፈሩ አርጥበታማ ስለሆነ ድጋሜ ቢከፍቱት ሰብሎት ይበላሻል መቆለፊያን ማብራት ይፈልጋሉ?',
     'cancel': 'ሰርዝ',
-    'turn_on': 'አብራሪ',
-    'soil_moisture': 'የምድር ሕጥብ',
-    'water_level': 'የውሃ አፍልት',
+    'turn_on': 'አብራ',
+    'soil_moisture': 'የአፈር አርጥበት',
+    'water_level': 'የውሃ መጠን',
     'temperature': 'ሙቀት',
     'humidity': 'እርጥብ',
     'weather_conditions': 'የአየር ሁኔታ',
     'pump_active': 'መቆለፊያ ተከፈቷል',
     'pump_inactive': 'መቆለፊያ አልተከፈተም',
-    'manual_override': 'ማኑዋል በደንብ ተጠናቀቀ (30 ደቂቃ)',
+    'manual_override': 'ማሽኑ ራሱን ሊያበራ የሚጥብቀው ስዓት (30 ሴኮንድ)',
 
     // PinLockScreen
     'welcome': 'እንኳን ደህና መጡ!',
     'to': 'ወደ',
     'app_name': 'MesnoTech',
     'enter_pin': 'ፒን ያስገቡ',
-    'reset': 'ዳግም',
+    'reset': 'ሰረዝ',
 
     // ChangePinScreen
     'incorrect_pin': 'ፒን ትክክል አይደለም!',
     'pin_4_digits': 'ፒን 4 ቁጥር መሆን አለበት!',
-    'pins_no_match': 'ፒኑ አተመጠጠ!',
+    'pins_no_match': 'ፒኑ አልተመሳሰለም!',
     'pin_changed': 'ፒኑ በተሳካ ሁኔታ ተቀይሯል!',
     'current_pin': 'የአሁኑ ፒን',
     'new_pin': 'አዲስ ፒን',
@@ -126,13 +126,13 @@ const Map<String, Map<String, String>> _localized = {
     // Misc
     'to_home': 'መለስ',
     //notification
-      'clear_history': 'ታሪኩን ቀይር',
+      'clear_history': 'ታሪኩን አጥፋ',
   'no_notifications': 'ማስታወቂያ የለም',
   },
   'om': {
     // MainScreen & Drawer
     'settings': 'KUTAA GULAALCHAA',
-    'title': 'Irrigaashinii Siisaamaa',
+    'title': 'Mesno-Tech',
     'home': 'Mana',
     'controller': 'To’ataa',
     'history': 'Seenaa',
@@ -146,20 +146,20 @@ const Map<String, Map<String, String>> _localized = {
     // ControlScreen
     'water_tank_status': 'Haala Tankii Bishaanii',
     'tank_empty_title': 'Tankiin Dufaadha',
-    'tank_empty_msg': 'Tankiin dufaadha; pampi banuun hin danda’amu',
+    'tank_empty_msg': 'Tankiin duwaadha; pampi banuun hin danda’amu',
     'ok': 'TOLE',
     'confirm_pump_title': 'Pampi banuu barbaadda?',
-    'confirm_pump_msg': 'Pampi akka banuu barbaaddu mirkaneessi?',
-    'cancel': 'HAMMA',
-    'turn_on': 'BANU',
-    'soil_moisture': 'Qullubbii Lafaa',
-    'water_level': 'Sadarkaa Bishaanii',
+    'confirm_pump_msg': 'Biyyeen jidhaadha Pampi akka banuu barbaaddu mirkaneessi?',
+    'cancel': 'LAKKI',
+    'turn_on': 'BANI',
+    'soil_moisture': 'Jidhina Biyyee',
+    'water_level': 'Hamma Bishaanii',
     'temperature': 'Ho’aa',
-    'humidity': 'Humidaatii',
+    'humidity': 'Jidhina Qilleensaa',
     'weather_conditions': 'Haala Qilleensaa',
     'pump_active': 'Pampi Hojii irra jira',
     'pump_inactive': 'Pampi Hojii irra hin jirtu',
-    'manual_override': 'Hojii Dirqama (daqiiqaa 30)',
+    'manual_override': 'Pampiin ofii isaatiin of bana(seecondii 30)',
 
     // PinLockScreen
     'welcome': 'Baga nagaan dhuftan!',

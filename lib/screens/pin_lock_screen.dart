@@ -77,11 +77,11 @@ class _PinLockScreenState extends State<PinLockScreen> {
           Expanded(
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text(tr('title'),
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.green)),
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: Colors.green)),
               const SizedBox(height: 8),
-              Text(tr('to'), style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic)),
-              Text(tr('title'),
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green.shade700)),
+              // Text(tr('to'), style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic)),
+              // Text(tr('title'),
+              //     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green.shade700)),
               const SizedBox(height: 30),
               Container(
                 width: 200,
