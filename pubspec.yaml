@@ -42,6 +42,10 @@ dependencies:
   google_generative_ai: ^0.4.7
   flutter_dotenv: ^5.2.1
   flutter_gemini: ^3.0.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.15
 
 dev_dependencies:
   flutter_test:

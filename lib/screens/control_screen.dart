@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:hive/hive.dart';
+import '../models/pump_log.dart'; // Import the PumpLog model
 import '../utils/language_strings.dart';
 
 class ControlScreen extends StatefulWidget {
@@ -15,7 +17,7 @@ class _ControlScreenState extends State<ControlScreen> {
   double _waterLevel = 0.0;
   String _error = '';
   late Timer _timer;
-  final String _ip = '192.168.0.12';
+  final String _ip = '192.168.9.131';
 
   @override
   void initState() {
@@ -79,10 +81,21 @@ class _ControlScreenState extends State<ControlScreen> {
     final r = await http.get(Uri.parse('http://$_ip/control?pump=$cmd'));
     if (r.statusCode == 200) {
       setState(() => _pumpOn = !_pumpOn);
+      _logPumpActivation(cmd);  // Log the pump activation
     } else {
       setState(() => _error = 'Control failed');
     }
   }
+
+  // Log Pump Activation to Hive
+ Future<void> _logPumpActivation(String status) async {
+  final box = await Hive.openBox<PumpLog>('pump_logs');
+  final log = PumpLog(
+    startedAt: DateTime.now(),
+    endedAt: _pumpOn ? null : DateTime.now(), // Only set 'endedAt' if pump is turned off
+  );
+  await box.add(log); // Save the log to Hive
+}
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +119,7 @@ class _ControlScreenState extends State<ControlScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text('${(_waterLevel * 100).toStringAsFixed(1)}% full', style: const TextStyle(fontSize: 18)),
-              ]),
+              ]), 
             ),
           ),
           const SizedBox(height: 20),
@@ -128,7 +141,7 @@ class _ControlScreenState extends State<ControlScreen> {
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(tr('confirm_pump_msg'), style: const TextStyle(color: Colors.orange)),
                   ),
-              ]),
+              ]), 
             ),
           ),
           if (_error.isNotEmpty)

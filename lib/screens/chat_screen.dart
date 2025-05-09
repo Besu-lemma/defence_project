@@ -1,8 +1,9 @@
 // lib/screens/chat_screen.dart
 
+import 'package:final_project/services/gemini_Service.dart';
 import 'package:flutter/material.dart';
 import '../models/message.dart';
-import '../services/gemini_service.dart';
+// import '../services/gemini_service.dart';
 import '../services/local_storage.dart';
 
 class ChatScreen extends StatefulWidget {

@@ -2,30 +2,35 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../services/notification_service.dart';
+import 'package:hive/hive.dart';
+
+import '../widgets/sensor_card.dart';
 import '../services/weather_service.dart';
+import '../services/notification_service.dart';
 import '../utils/language_strings.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
+
   @override
   HomeScreenState createState() => HomeScreenState();
 }
 
 class HomeScreenState extends State<HomeScreen> {
   final WeatherService _weatherService = WeatherService();
-  Map<String, dynamic> _w = {};
-  Map<String, dynamic> _s = {};
+  Map<String, dynamic> _weatherData = {};
+  Map<String, dynamic>? _sensorData;
+  bool _isOfflineData = false;
   bool _loading = true;
   String _error = '';
   late Timer _timer;
-  final String _ip = '192.168.0.12';
 
   @override
   void initState() {
     super.initState();
-    _refreshAll();
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) => _fetchSensor());
+    fetchAllData();
+    // _refreshAll();
+    _timer = Timer.periodic(const Duration(seconds: 10), (_) => _fetchSensorData());
   }
 
   @override
@@ -34,32 +39,69 @@ class HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<void> _refreshAll() async {
-    try {
-      _w = await _weatherService.fetchWeather(9.03, 38.74);
-    } catch (_) {
-      NotificationService.addNotification('Weather Error', 'Failed to fetch weather');
-    }
-    await _fetchSensor();
+  Future<void> fetchAllData() async {
+    await Future.wait([
+      _fetchWeather(),
+      
+      _fetchSensorData(),
+    ]);
   }
 
-  Future<void> _fetchSensor() async {
+  Future<void> _fetchWeather() async {
+    print('Weather API response: $_weatherData');
+
     try {
-      final res = await http
-          .get(Uri.parse('http://$_ip/data'))
+      final data = await _weatherService.fetchWeather(9.03, 38.74);
+      setState(() {
+        _weatherData = data;
+      });
+    } catch (e) {
+      NotificationService.addNotification(
+        'Weather Error',
+        'Failed to fetch weather data',
+      );
+    }
+  }
+
+
+  Future<void> _fetchSensorData() async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://192.168.9.131/data'))
           .timeout(const Duration(seconds: 3));
-      if (res.statusCode == 200) {
-        _s = json.decode(res.body);
-        setState(() => _loading = false);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _sensorData = data;
+          _isOfflineData = false;
+          _loading = false;
+        });
+
+        final box = await Hive.openBox('sensor_data');
+        await box.put('latest', data);
+      } else {
+        await _loadOfflineData();
       }
     } catch (e) {
+      await _loadOfflineData();
+    }
+  }
+
+  Future<void> _loadOfflineData() async {
+    final box = await Hive.openBox('sensor_data');
+    final data = box.get('latest');
+
+    if (data != null && mounted) {
       setState(() {
-        _error = e is TimeoutException ? 'Connection timeout' : 'Error: $e';
+        _sensorData = Map<String, dynamic>.from(data);
+        _isOfflineData = true;
+        _loading = false;
       });
     }
   }
 
-  IconData _iconForCode(int code) {
+  IconData _iconForWeatherCode(int code) {
     if (code == 0) return Icons.wb_sunny;
     if (code <= 3) return Icons.wb_cloudy;
     if (code <= 48) return Icons.cloud;
@@ -68,93 +110,115 @@ class HomeScreenState extends State<HomeScreen> {
     if (code >= 95) return Icons.flash_on;
     return Icons.help_outline;
   }
+Widget _buildWeatherCard() {
+  final temperature = _weatherData['current_weather']?['temperature'];
+  final wind = _weatherData['current_weather']?['windspeed'];
+  final pumpStatus = _sensorData != null ? _sensorData!['pumpStatus'] : null;
 
-  Widget _weatherCard() {
-    final current = _w['current_weather'] ?? {};
-    final code = current['weathercode'] as int? ?? 0;
-    final temp = (current['temperature'] as num?)?.toStringAsFixed(1) ?? '--';
-    final wind = (current['windspeed'] as num?)?.toStringAsFixed(1) ?? '--';
-    final pumpOn = _s['pumpStatus'] == 'ON';
-
-    return Card(
-      margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-        child: Column(
-          children: [
-            Icon(_iconForCode(code), size: 64, color: Colors.orange),
-            const SizedBox(height: 12),
-            Text(
-              '$temp°C',
-              style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+  return Card(
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          const Text(
+            'WEATHER CONDITIONS',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.teal,
             ),
-            const SizedBox(height: 4),
-            Text(
-              _w['weather_descriptions'] != null
-                  ? (_w['weather_descriptions'][0] as String)
-                  : tr('weather_conditions'),
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.air, color: Colors.blue),
-                const SizedBox(width: 6),
-                Text('$wind m/s', style: const TextStyle(fontSize: 16)),
-                const SizedBox(width: 24),
-                Icon(Icons.power, color: pumpOn ? Colors.green : Colors.red),
-                const SizedBox(width: 6),
-                Text(
-                  pumpOn ? tr('pump_active') : tr('pump_inactive'),
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: pumpOn ? Colors.green : Colors.red,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  const Icon(Icons.thermostat, size: 40, color: Colors.orange),
+                  const SizedBox(height: 8),
+                  Text(
+                    // temperature != null ? '${temperature.toStringAsFixed(1)}°C' 
+                    // : '--',
+                    '${temperature?.toStringAsFixed(1) ?? "--"}°C',
+                    style: const TextStyle(fontSize: 24),
                   ),
-                ),
-              ],
-            ),
-          ],
-        ),
+                  const Text('Temperature'),
+                ],
+              ),
+              Column(
+                children: [
+                  const Icon(Icons.wind_power, size: 40, color: Colors.orange),
+                  const SizedBox(height: 8),
+                  Text(
+                    // temperature != null ? '${temperature.toStringAsFixed(1)}°C' 
+                    // : '--',
+                    '${_weatherData['current_weather']?['windspeed']?.toStringAsFixed(1) ?? "--"} km/h',
+                 style: TextStyle(fontSize: 16),
+                  ),
+                  const Text('wind'),
+                ],
+              ),
+              Column(
+                children: [
+                  const Icon(Icons.power, size: 40, color: Colors.blue),
+                  const SizedBox(height: 8),
+                  Text(
+                    pumpStatus != null ? pumpStatus.toString() : '--',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: pumpStatus == "ON" ? Colors.green : Colors.red,
+                    ),
+                  ),
+                  const Text('Pump status'),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _sensorGrid() {
+
+  Widget _buildSensorGrid() {
     if (_loading) return const Center(child: CircularProgressIndicator());
+
+    final s = _sensorData!;
     return GridView.count(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       crossAxisCount: 2,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
       childAspectRatio: 1.2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       children: [
-         _sensorCard(tr('soil_moisture'), '${_s['soilMoisture'] ?? '--'}', Icons.grass, Colors.green),
-  _sensorCard(tr('water_level'), '${_s['waterLevel'] ?? '--'}%', Icons.water, Colors.blue),
-  _sensorCard(tr('temperature'), '${_s['temperature'] ?? '--'}°C', Icons.thermostat, Colors.orange),
-  _sensorCard(tr('humidity'), '${_s['humidity'] ?? '--'}%', Icons.water_drop, Colors.blue),
+        SensorCard(
+          icon: Icons.grass,
+          title: tr('soil_moisture'),
+          value: s['soilMoisture'].toString(),
+          unit: '%',
+        ),
+        SensorCard(
+          icon: Icons.water,
+          title: tr('water_level'),
+          value: s['waterLevel'].toString(),
+          unit: '%',
+        ),
+        SensorCard(
+          icon: Icons.thermostat,
+          title: tr('temperature'),
+          value: s['temperature'].toString(),
+          unit: '°C',
+        ),
+        SensorCard(
+          icon: Icons.water_drop,
+          title: tr('humidity'),
+          value: s['humidity'].toString(),
+          unit: '%',
+        ),
       ],
-    );
-  }
-
-  Widget _sensorCard(String label, String value, IconData icon, Color color) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(icon, size: 36, color: color),
-          const SizedBox(height: 8),
-          Text(value,
-              style:
-                  TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
-          const SizedBox(height: 4),
-          Text(label, style: const TextStyle(fontSize: 14)),
-        ]),
-      ),
     );
   }
 
@@ -162,16 +226,29 @@ class HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _weatherCard(),
-        Expanded(child: _sensorGrid()),
+        _buildWeatherCard(),
+        Expanded(child: _buildSensorGrid()),
         if (_error.isNotEmpty)
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(_error, style: const TextStyle(color: Colors.red)),
           ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            _isOfflineData
+                ? tr('offline_data_message')
+                : tr('live_data_message'),
+            style: TextStyle(
+              fontStyle: FontStyle.italic,
+              color: _isOfflineData ? Colors.red : Colors.green,
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  void fetchAllData() {}
+//   void fetchAllData() {}
+// }
 }

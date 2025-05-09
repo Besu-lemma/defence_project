@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:restart_app/restart_app.dart';
 import '../utils/language_strings.dart';
 import 'home_screen.dart';
+import 'chat_screen.dart';
 import 'control_screen.dart';
 import 'history_screen.dart';
 import 'notification_screen.dart';
@@ -76,6 +77,14 @@ class _MainScreenState extends State<MainScreen> {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const NotificationScreen()),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.history),
+            title: Text(tr('Chat')),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ChatScreen()),
             ),
           ),
           ListTile(
